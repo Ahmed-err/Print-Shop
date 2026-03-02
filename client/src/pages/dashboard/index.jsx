@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { Package, Clock, CheckCircle, FileText } from 'lucide-react';
+import axios from 'axios';
 
 export default function Dashboard() {
     const { user } = useContext(AuthContext);
@@ -10,31 +11,15 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                // Fetching an aggregate of user orders (assuming backend later provides this route)
-                // For now, we mock some recent activity to complete the Phase 2 UI.
-                const mockOrders = [
-                    {
-                        _id: 'ord-12345',
-                        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-                        totalPrice: 45.00,
-                        isPaid: true,
-                        status: 'Processing',
-                        orderItems: [{ product: 'Business Cards', quantity: 100 }]
-                    },
-                    {
-                        _id: 'ord-67890',
-                        createdAt: new Date(Date.now() - 86400000 * 15).toISOString(),
-                        totalPrice: 120.00,
-                        isPaid: true,
-                        status: 'Delivered',
-                        orderItems: [{ product: 'Posters', quantity: 50 }]
-                    }
-                ];
+                if (!user) return;
 
-                setTimeout(() => {
-                    setOrders(mockOrders);
-                    setLoading(false);
-                }, 800);
+                const res = await axios.get('http://localhost:5000/api/orders/myorders', {
+                    headers: {
+                        Authorization: `Bearer ${user.token}`
+                    }
+                });
+                setOrders(res.data);
+                setLoading(false);
             } catch (err) {
                 console.error(err);
                 setLoading(false);
@@ -102,15 +87,16 @@ export default function Dashboard() {
                                                 {new Date(order.createdAt).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {order.orderItems[0].quantity}x {order.orderItems[0].product}
+                                                {order.orderItems[0]?.quantity}x {order.orderItems[0]?.product?.replace('-', ' ')}
+                                                {order.orderItems.length > 1 && <span className="text-xs text-gray-400 ml-1">(+{order.orderItems.length - 1} more)</span>}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
-                                                        order.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.isDelivered ? 'bg-green-100 text-green-800' :
+                                                        order.isPaid ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
                                                     }`}>
-                                                    {order.status === 'Delivered' && <CheckCircle className="w-3 h-3 mr-1 mt-0.5" />}
-                                                    {order.status === 'Processing' && <Clock className="w-3 h-3 mr-1 mt-0.5" />}
-                                                    {order.status}
+                                                    {order.isDelivered && <CheckCircle className="w-3 h-3 mr-1 mt-0.5" />}
+                                                    {!order.isDelivered && order.isPaid && <Clock className="w-3 h-3 mr-1 mt-0.5" />}
+                                                    {order.isDelivered ? 'Delivered' : order.isPaid ? 'Processing' : 'Pending Payment'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
