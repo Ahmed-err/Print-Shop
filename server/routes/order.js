@@ -44,6 +44,18 @@ router.post('/', protect, async (req, res) => {
     }
 });
 
+// @route GET /api/orders/myorders
+// @desc Get logged in user orders
+// @access Private
+router.get('/myorders', protect, async (req, res) => {
+    try {
+        const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching orders' });
+    }
+});
+
 // @route POST /api/orders/:id/pay
 // @desc Create stripe payment intent
 // @access Private
