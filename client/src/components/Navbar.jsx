@@ -2,9 +2,11 @@ import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Printer, ShoppingCart, User, Menu, LogOut, Settings } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import { CartContext } from '../context/CartContext';
 
 export default function Navbar() {
     const { user, logout } = useContext(AuthContext);
+    const { getCartCount } = useContext(CartContext);
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -42,10 +44,14 @@ export default function Navbar() {
                                 <Link to="/dashboard" className="text-gray-600 hover:text-brand-red transition-colors p-2" title="Dashboard">
                                     <User className="h-5 w-5" />
                                 </Link>
-                                <button className="text-gray-600 hover:text-brand-red transition-colors p-2 relative">
+                                <Link to="/cart" className="text-gray-600 hover:text-brand-red transition-colors p-2 relative" title="View Cart">
                                     <ShoppingCart className="h-5 w-5" />
-                                    <span className="absolute top-0 right-0 bg-brand-red text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">0</span>
-                                </button>
+                                    {getCartCount() > 0 && (
+                                        <span className="absolute top-0 right-0 bg-brand-red text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
+                                            {getCartCount()}
+                                        </span>
+                                    )}
+                                </Link>
                                 <button onClick={handleLogout} className="text-gray-600 hover:text-brand-red transition-colors p-2" title="Logout">
                                     <LogOut className="h-5 w-5" />
                                 </button>

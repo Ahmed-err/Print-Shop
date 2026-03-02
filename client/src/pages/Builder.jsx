@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Upload, File, CheckCircle2, ChevronRight } from 'lucide-react';
+import { CartContext } from '../context/CartContext';
 
 export default function Builder() {
+    const { addToCart } = useContext(CartContext);
+    const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [config, setConfig] = useState({
         product: '',
@@ -234,12 +238,16 @@ export default function Builder() {
                                         alert("Please upload your artwork before continuing.");
                                         return;
                                     }
-                                    window.location.href = `/checkout?product=${config.product}&total=${calculateTotal()}`;
+                                    addToCart({
+                                        ...config,
+                                        price: calculateTotal()
+                                    });
+                                    navigate('/cart');
                                 }}
                                 disabled={!config.product || !config.paper || !config.finish || !config.artwork}
                                 className="w-full bg-brand-red text-white py-4 rounded-lg font-bold text-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Continue to Checkout
+                                Add to Cart
                             </button>
                         </div>
                     </div>

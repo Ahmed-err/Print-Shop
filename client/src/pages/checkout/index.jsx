@@ -3,7 +3,9 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { AuthContext } from '../../context/AuthContext';
+import { CartContext } from '../../context/CartContext';
 import { CreditCard, CheckCircle2 } from 'lucide-react';
+import axios from 'axios';
 
 const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx'); // Default Stripe test key for demo
 
@@ -25,11 +27,40 @@ const CheckoutForm = ({ clientSecret, orderDetails, onSuccess }) => {
         //     payment_method: { card: elements.getElement(CardElement) }
         // });
 
-        // Simulating a successful network charge for the demo since we don't have a real strict clientSecret setup
-        setTimeout(() => {
+        // Simulating a successful network charge and placing order
+        try {
+            const token = JSON.parse(localStorage.getItem('user'))?.token;
+            await axios.post('http://localhost:5000/api/orders', {
+                orderItems: orderDetails.cart.map(item => ({
+                    product: item.product,
+                    paperType: item.paper,
+                    finish: item.finish,
+                    quantity: item.quantity,
+                    price: parseFloat(item.price),
+                    designFileUrl: item.artwork
+                })),
+                shippingAddress: {
+                    address: "123 Default Street",
+                    city: "Print City",
+                    postalCode: "12345",
+                    country: "US"
+                },
+                paymentMethod: "Stripe",
+                itemsPrice: orderDetails.total,
+                taxPrice: 0.00,
+                shippingPrice: 0.00,
+                totalPrice: orderDetails.total
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             setProcessing(false);
             onSuccess();
-        }, 1500);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to create order. Please try again.");
+            setProcessing(false);
+        }
     };
 
     return (
@@ -68,16 +99,18 @@ const CheckoutForm = ({ clientSecret, orderDetails, onSuccess }) => {
 };
 
 export default function Checkout() {
-    const [searchParams] = useSearchParams();
+    const { cart, getCartTotal, clearCart } = useContext(CartContext);
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const [clientSecret, setClientSecret] = useState('');
     const [success, setSuccess] = useState(false);
 
-    const amount = searchParams.get('total') || '0.00';
-    const product = searchParams.get('product') || 'Custom Print';
+    const amount = getCartTotal();
 
     useEffect(() => {
+        if (cart.length === 0 && !success) {
+            navigate('/cart');
+        }
         // In a real app, you'd fetch the checkout intent from the server here
         // fetch('/api/orders/create-intent', ...)
         setClientSecret('mock_secret_' + Math.random());
@@ -93,7 +126,10 @@ export default function Checkout() {
                         Thank you for your purchase. We've received your artwork and will start processing your order immediately.
                     </p>
                     <button
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => {
+                            clearCart();
+                            navigate('/dashboard');
+                        }}
                         className="w-full bg-brand-red text-white py-3 rounded-lg font-bold hover:bg-red-700 transition-colors"
                     >
                         View Order Dashboard
@@ -116,7 +152,7 @@ export default function Checkout() {
                         <Elements stripe={stripePromise}>
                             <CheckoutForm
                                 clientSecret={clientSecret}
-                                orderDetails={{ total: amount, product }}
+                                orderDetails={{ total: amount, cart }}
                                 onSuccess={() => setSuccess(true)}
                             />
                         </Elements>
@@ -127,9 +163,8 @@ export default function Checkout() {
                             <h3 className="text-xl font-bold mb-6 border-b border-gray-100 pb-4">Order Summary</h3>
 
                             <div className="space-y-4 mb-6">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-600 font-medium capitalize">{product.replace('-', ' ')}</span>
-                                    <span className="font-bold">${amount}</span>
+                                <div className="flex justify-between items-center text-sm text-gray-500">
+                                    <span>{cart.length} item(s)</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm text-gray-500">
                                     <span>Shipping</span>
