@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Users, Package, DollarSign, Activity, Settings, CheckCircle } from 'lucide-react';
+import axios from 'axios';
 
 export default function AdminDashboard() {
     const { user } = useContext(AuthContext);
@@ -9,7 +10,8 @@ export default function AdminDashboard() {
     const [stats, setStats] = useState({
         totalRevenue: 0,
         pendingOrders: 0,
-        completedOrders: 0
+        completedOrders: 0,
+        activeUsers: 0
     });
     const [loading, setLoading] = useState(true);
 
@@ -18,41 +20,70 @@ export default function AdminDashboard() {
     }
 
     useEffect(() => {
-        // Mock data fetching for admin orders
-        setTimeout(() => {
-            const mockOrders = [
-                {
-                    _id: 'ord-admin-001',
-                    user: { name: 'John Doe', email: 'john@example.com' },
-                    createdAt: new Date().toISOString(),
-                    totalPrice: 150.00,
-                    isPaid: true,
-                    status: 'Pending',
-                    orderItems: [{ product: 'Business Cards', quantity: 500 }]
-                },
-                {
-                    _id: 'ord-admin-002',
-                    user: { name: 'Jane Smith', email: 'jane@example.com' },
-                    createdAt: new Date(Date.now() - 86400000).toISOString(),
-                    totalPrice: 45.00,
-                    isPaid: true,
-                    status: 'Completed',
-                    orderItems: [{ product: 'Posters', quantity: 10 }]
+        const fetchAdminData = async () => {
+            try {
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${user.token}`,
+                    }
+                };
+
+                const [ordersRes, usersRes] = await Promise.all([
+                    axios.get('http://localhost:5000/api/admin/orders', config),
+                    axios.get('http://localhost:5000/api/admin/users', config)
+                ]);
+
+                const fetchedOrders = ordersRes.data;
+                const fetchedUsers = usersRes.data;
+
+                setOrders(fetchedOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+
+                // Calculate dynamic stats
+                const totalRev = fetchedOrders.reduce((acc, order) => acc + (order.totalPrice || 0), 0);
+                const completeCount = fetchedOrders.filter(o => o.isDelivered).length;
+                const pendingCount = fetchedOrders.filter(o => !o.isDelivered).length;
+
+                setStats({
+                    totalRevenue: totalRev,
+                    pendingOrders: pendingCount,
+                    completedOrders: completeCount,
+                    activeUsers: fetchedUsers.length
+                });
+
+                setLoading(false);
+            } catch (err) {
+                console.error(err);
+                setLoading(false);
+            }
+        };
+
+        fetchAdminData();
+    }, [user]);
+
+    const updateOrderStatus = async (orderId) => {
+        try {
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
                 }
-            ];
+            };
+            // Call the delivery endpoint
+            await axios.put(`http://localhost:5000/api/admin/orders/${orderId}/deliver`, {}, config);
 
-            setOrders(mockOrders);
-            setStats({
-                totalRevenue: 195.00,
-                pendingOrders: 1,
-                completedOrders: 1
-            });
-            setLoading(false);
-        }, 800);
-    }, []);
+            // Update local state without refetching all orders
+            setOrders(orders.map(o => o._id === orderId ? { ...o, isDelivered: true, status: 'Completed' } : o));
 
-    const updateOrderStatus = (orderId, newStatus) => {
-        setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
+            // Update stats
+            setStats(prev => ({
+                ...prev,
+                pendingOrders: prev.pendingOrders - 1,
+                completedOrders: prev.completedOrders + 1
+            }));
+
+        } catch (err) {
+            console.error('Failed to update order status');
+            alert('Failed to update order status');
+        }
     };
 
     if (loading) {
@@ -117,7 +148,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                             <p className="text-sm font-medium text-gray-500">Active Users</p>
-                            <p className="text-2xl font-bold text-gray-900">124</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.activeUsers}</p>
                         </div>
                     </div>
                 </div>
@@ -156,18 +187,18 @@ export default function AdminDashboard() {
                                             {order.orderItems[0].quantity}x {order.orderItems[0].product}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.isDelivered ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                                 }`}>
-                                                {order.status}
+                                                {order.isDelivered ? 'Completed' : 'Pending'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            ${order.totalPrice.toFixed(2)}
+                                            ${(order.totalPrice || 0).toFixed(2)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            {order.status === 'Pending' && (
+                                            {!order.isDelivered && (
                                                 <button
-                                                    onClick={() => updateOrderStatus(order._id, 'Completed')}
+                                                    onClick={() => updateOrderStatus(order._id)}
                                                     className="bg-brand-dark text-white px-3 py-1 rounded hover:bg-gray-800 transition-colors"
                                                 >
                                                     Mark Complete
