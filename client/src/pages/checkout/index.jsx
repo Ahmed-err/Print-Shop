@@ -2,12 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { CartContext } from '../../context/CartContext';
-import { CreditCard, CheckCircle2, Banknote } from 'lucide-react';
+import { CreditCard, CheckCircle2, Banknote, Smartphone, Zap } from 'lucide-react';
 import axios from 'axios';
 
 const CheckoutForm = ({ orderDetails, onSuccess }) => {
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState(null);
+    const [mobileNumber, setMobileNumber] = useState('');
     const { user } = useContext(AuthContext);
     const token = user?.token;
 
@@ -46,16 +47,24 @@ const CheckoutForm = ({ orderDetails, onSuccess }) => {
 
                 setProcessing(false);
                 onSuccess();
-            } else if (method === 'paymob') {
-                // For Paymob, we trigger the backend sequence to get an iframe URL
+            } else if (['card', 'wallet', 'instapay'].includes(method)) {
+                if ((method === 'wallet' || method === 'instapay') && !mobileNumber) {
+                    setError('Please enter your mobile number or InstaPay address.');
+                    setProcessing(false);
+                    return;
+                }
+
+                // For Paymob, we trigger the backend sequence to get an iframe URL or redirect URL
                 const response = await axios.post('http://localhost:5000/api/orders/paymob/auth', {
                     amount: orderDetails.total,
-                    cart: orderDetails.cart
+                    cart: orderDetails.cart,
+                    paymentMethodType: method,
+                    mobileNumber: mobileNumber
                 }, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
-                // Redirect user to the Paymob iframe URL returned by our backend
+                // Redirect user to the Paymob iframe/hosted URL returned by our backend
                 if (response.data && response.data.url) {
                     window.location.href = response.data.url;
                 } else {
@@ -76,9 +85,22 @@ const CheckoutForm = ({ orderDetails, onSuccess }) => {
                     Payment Instructions
                 </h3>
                 <div className="p-4 border border-gray-300 rounded-md bg-gray-50 text-gray-600">
-                    {orderDetails.method === 'cod'
-                        ? "You will pay for your order in cash upon delivery."
-                        : "You will be redirected to the secure Paymob gateway to complete your credit card payment."}
+                    {orderDetails.method === 'cod' && "You will pay for your order in cash upon delivery."}
+                    {orderDetails.method === 'card' && "You will be redirected to the secure Paymob gateway to complete your credit card payment."}
+                    {(orderDetails.method === 'wallet' || orderDetails.method === 'instapay') && (
+                        <div className="flex flex-col space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Mobile Number / Identifier</label>
+                            <input
+                                type="text"
+                                placeholder={orderDetails.method === 'wallet' ? "e.g. 01010101010" : "Mobile or InstaPay Address"}
+                                className="border border-gray-300 rounded-lg p-2 flex-1 outline-none focus:ring-2 focus:ring-brand-dark"
+                                value={mobileNumber}
+                                onChange={(e) => setMobileNumber(e.target.value)}
+                                required
+                            />
+                            <p className="text-xs text-gray-500">You will be redirected to authorize the payment via your mobile phone.</p>
+                        </div>
+                    )}
                 </div>
                 {error && <div className="mt-4 text-sm text-red-600">{error}</div>}
             </div>
@@ -168,23 +190,60 @@ export default function Checkout() {
                                     )}
                                 </div>
 
-                                {/* Paymob Option */}
+                                {/* Card Option */}
                                 <div
-                                    className={`relative border rounded-xl p-4 cursor-pointer transition-all ${paymentMethod === 'paymob' ? 'border-brand-dark bg-brand-dark/5 ring-2 ring-brand-dark' : 'border-gray-200 hover:border-gray-300'
+                                    className={`relative border rounded-xl p-4 cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-brand-dark bg-brand-dark/5 ring-2 ring-brand-dark' : 'border-gray-200 hover:border-gray-300'
                                         }`}
-                                    onClick={() => setPaymentMethod('paymob')}
+                                    onClick={() => setPaymentMethod('card')}
                                 >
                                     <div className="flex flex-col h-full">
-                                        <CreditCard className={`w-8 h-8 mb-3 ${paymentMethod === 'paymob' ? 'text-brand-dark' : 'text-gray-400'}`} />
-                                        <span className={`font-bold ${paymentMethod === 'paymob' ? 'text-brand-dark' : 'text-gray-700'}`}>Credit/Debit Card</span>
-                                        <span className="text-sm text-gray-500 mt-1">Secure payment via Paymob network.</span>
+                                        <CreditCard className={`w-8 h-8 mb-3 ${paymentMethod === 'card' ? 'text-brand-dark' : 'text-gray-400'}`} />
+                                        <span className={`font-bold ${paymentMethod === 'card' ? 'text-brand-dark' : 'text-gray-700'}`}>Credit / Debit Card</span>
+                                        <span className="text-sm text-gray-500 mt-1">Paymob secure payment.</span>
                                     </div>
-                                    {paymentMethod === 'paymob' && (
+                                    {paymentMethod === 'card' && (
                                         <div className="absolute top-4 right-4 text-brand-dark">
                                             <CheckCircle2 className="w-5 h-5 fill-current" />
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Wallet Option */}
+                                <div
+                                    className={`relative border rounded-xl p-4 cursor-pointer transition-all ${paymentMethod === 'wallet' ? 'border-brand-dark bg-brand-dark/5 ring-2 ring-brand-dark' : 'border-gray-200 hover:border-gray-300'
+                                        }`}
+                                    onClick={() => setPaymentMethod('wallet')}
+                                >
+                                    <div className="flex flex-col h-full">
+                                        <Smartphone className={`w-8 h-8 mb-3 ${paymentMethod === 'wallet' ? 'text-brand-dark' : 'text-gray-400'}`} />
+                                        <span className={`font-bold ${paymentMethod === 'wallet' ? 'text-brand-dark' : 'text-gray-700'}`}>Mobile Wallet</span>
+                                        <span className="text-sm text-gray-500 mt-1">Vodafone Cash etc.</span>
+                                    </div>
+                                    {paymentMethod === 'wallet' && (
+                                        <div className="absolute top-4 right-4 text-brand-dark">
+                                            <CheckCircle2 className="w-5 h-5 fill-current" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* InstaPay Option */}
+                                <div
+                                    className={`relative border rounded-xl p-4 cursor-pointer transition-all ${paymentMethod === 'instapay' ? 'border-brand-dark bg-brand-dark/5 ring-2 ring-brand-dark' : 'border-gray-200 hover:border-gray-300'
+                                        }`}
+                                    onClick={() => setPaymentMethod('instapay')}
+                                >
+                                    <div className="flex flex-col h-full">
+                                        <Zap className={`w-8 h-8 mb-3 ${paymentMethod === 'instapay' ? 'text-brand-dark' : 'text-gray-400'}`} />
+                                        <span className={`font-bold ${paymentMethod === 'instapay' ? 'text-brand-dark' : 'text-gray-700'}`}>InstaPay</span>
+                                        <span className="text-sm text-gray-500 mt-1">Direct bank transfer.</span>
+                                    </div>
+                                    {paymentMethod === 'instapay' && (
+                                        <div className="absolute top-4 right-4 text-brand-dark">
+                                            <CheckCircle2 className="w-5 h-5 fill-current" />
+                                        </div>
+                                    )}
+                                </div>
+
                             </div>
                         </div>
 

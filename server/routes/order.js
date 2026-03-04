@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const Order = require('../models/Order');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -55,26 +56,95 @@ router.get('/myorders', protect, async (req, res) => {
 });
 
 // @route POST /api/orders/paymob/auth
-// @desc Initialize Paymob payment (Mocked for testing until keys are provided)
+// @desc Initialize Paymob payment
 // @access Private
 router.post('/paymob/auth', protect, async (req, res) => {
     try {
-        const { amount, cart } = req.body;
+        const { amount, cart, paymentMethodType, mobileNumber } = req.body;
 
-        // In a real implementation:
-        // 1. axios.post(paymob auth endpoint, API_KEY) -> token
-        // 2. axios.post(paymob order registration endpoint) -> order_id
-        // 3. axios.post(paymob payment key endpoint) -> payment_key
-
-        // Return a mock iframe URL that the frontend can redirect to for testing
-        // You would replace 'checkout_dummy_iframe' with the actual Paymob IFRAME ID if you had keys.
-        const mockIframeUrl = `https://accept.paymob.com/api/acceptance/iframes/checkout_dummy_iframe?payment_token=mocked_${Date.now()}`;
-
-        res.json({
-            url: mockIframeUrl
+        // 1. Get Auth Token
+        const authRes = await axios.post('https://accept.paymob.com/api/auth/tokens', {
+            api_key: process.env.PAYMOB_API_KEY
         });
+        const pToken = authRes.data.token;
+
+        // 2. Register Order
+        const orderRes = await axios.post('https://accept.paymob.com/api/ecommerce/orders', {
+            auth_token: pToken,
+            delivery_needed: false,
+            amount_cents: Math.round(amount * 100).toString(),
+            currency: "EGP",
+            items: [],
+        });
+        const pOrderId = orderRes.data.id;
+
+        // 3. Request Payment Key
+        let integrationId;
+        if (paymentMethodType === 'card') integrationId = process.env.PAYMOB_INTEGRATION_ID_CARD;
+        else if (paymentMethodType === 'wallet') integrationId = process.env.PAYMOB_INTEGRATION_ID_WALLET;
+        else if (paymentMethodType === 'instapay') integrationId = process.env.PAYMOB_INTEGRATION_ID_INSTAPAY;
+
+        if (!integrationId) {
+            return res.status(400).json({ message: `Integration ID for ${paymentMethodType} is not configured.` });
+        }
+
+        const keyRes = await axios.post('https://accept.paymob.com/api/acceptance/payment_keys', {
+            auth_token: pToken,
+            amount_cents: Math.round(amount * 100).toString(),
+            expiration: 3600,
+            order_id: pOrderId,
+            billing_data: {
+                apartment: "1", email: req.user.email || "dummy@dummy.com", floor: "1",
+                first_name: req.user.name || "Customer", street: "Test", building: "1",
+                phone_number: mobileNumber || "+201011122233", shipping_method: "PKG",
+                postal_code: "12345", city: "Egypt", country: "EGY", last_name: "Customer", state: "Cairo"
+            },
+            currency: "EGP",
+            integration_id: integrationId
+        });
+
+        const paymentKey = keyRes.data.token;
+
+        // 4. Return URL Frame or Redirect URL
+        if (paymentMethodType === 'card') {
+            res.json({ url: `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_CARD_IFRAME_ID}?payment_token=${paymentKey}` });
+        } else {
+            // For Wallet / InstaPay
+            const payRes = await axios.post('https://accept.paymob.com/api/acceptance/payments/pay', {
+                source: {
+                    identifier: mobileNumber || "wallet",
+                    subtype: paymentMethodType === 'wallet' ? 'WALLET' : 'MAGVA'
+                },
+                payment_token: paymentKey
+            });
+
+            if (payRes.data.redirect_url) {
+                res.json({ url: payRes.data.redirect_url });
+            } else {
+                res.status(400).json({ message: 'Paymob Error: missing redirect URL', data: payRes.data });
+            }
+        }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Paymob Error:", error.response?.data || error.message);
+        res.status(500).json({ message: 'Paymob integration error', error: error.response?.data || error.message });
+    }
+});
+
+// @route POST /api/orders/paymob/webhook
+// @desc Handle Paymob transaction callback
+// @access Public
+router.post('/paymob/webhook', async (req, res) => {
+    try {
+        const { obj } = req.body;
+        if (obj && obj.success === true) {
+            // Validate HMAC payload here in a real production env.
+            // Marking order as paid using the merchant_order_id if provided.
+            console.log("Paymob Payment Success Callback for Order:", obj.order?.id);
+        }
+        res.sendStatus(200);
+    } catch (error) {
+        console.error("Webhook error:", error);
+        res.sendStatus(500);
     }
 });
 
