@@ -1,10 +1,8 @@
 const express = require('express');
-const Stripe = require('stripe');
 const Order = require('../models/Order');
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mocked');
 
 // @route POST /api/orders
 // @desc Create new order
@@ -56,27 +54,25 @@ router.get('/myorders', protect, async (req, res) => {
     }
 });
 
-// @route POST /api/orders/:id/pay
-// @desc Create stripe payment intent
+// @route POST /api/orders/paymob/auth
+// @desc Initialize Paymob payment (Mocked for testing until keys are provided)
 // @access Private
-router.post('/:id/create-payment-intent', protect, async (req, res) => {
+router.post('/paymob/auth', protect, async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id);
+        const { amount, cart } = req.body;
 
-        if (order) {
-            // Create a PaymentIntent with the order amount and currency
-            const paymentIntent = await stripe.paymentIntents.create({
-                amount: Math.round(order.totalPrice * 100), // amount in cents
-                currency: 'usd',
-                metadata: { orderId: order._id.toString() }
-            });
+        // In a real implementation:
+        // 1. axios.post(paymob auth endpoint, API_KEY) -> token
+        // 2. axios.post(paymob order registration endpoint) -> order_id
+        // 3. axios.post(paymob payment key endpoint) -> payment_key
 
-            res.json({
-                clientSecret: paymentIntent.client_secret,
-            });
-        } else {
-            res.status(404).json({ message: 'Order not found' });
-        }
+        // Return a mock iframe URL that the frontend can redirect to for testing
+        // You would replace 'checkout_dummy_iframe' with the actual Paymob IFRAME ID if you had keys.
+        const mockIframeUrl = `https://accept.paymob.com/api/acceptance/iframes/checkout_dummy_iframe?payment_token=mocked_${Date.now()}`;
+
+        res.json({
+            url: mockIframeUrl
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

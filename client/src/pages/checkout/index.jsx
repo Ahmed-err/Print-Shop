@@ -1,61 +1,67 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { CartContext } from '../../context/CartContext';
-import { CreditCard, CheckCircle2 } from 'lucide-react';
+import { CreditCard, CheckCircle2, Banknote } from 'lucide-react';
 import axios from 'axios';
 
-const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx'); // Default Stripe test key for demo
-
-const CheckoutForm = ({ clientSecret, orderDetails, onSuccess }) => {
-    const stripe = useStripe();
-    const elements = useElements();
-    const [error, setError] = useState(null);
+const CheckoutForm = ({ orderDetails, onSuccess }) => {
     const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState(null);
+    const { user } = useContext(AuthContext);
+    const token = user?.token;
 
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event, method) => {
         event.preventDefault();
-
-        if (!stripe || !elements) return;
-
         setProcessing(true);
+        setError(null);
 
-        // In a real app we'd confirm the payment intent here
-        // const payload = await stripe.confirmCardPayment(clientSecret, {
-        //     payment_method: { card: elements.getElement(CardElement) }
-        // });
-
-        // Simulating a successful network charge and placing order
         try {
-            const token = JSON.parse(localStorage.getItem('user'))?.token;
-            await axios.post('http://localhost:5000/api/orders', {
-                orderItems: orderDetails.cart.map(item => ({
-                    product: item.product,
-                    paperType: item.paper,
-                    finish: item.finish,
-                    quantity: item.quantity,
-                    price: parseFloat(item.price),
-                    designFileUrl: item.artwork
-                })),
-                shippingAddress: {
-                    address: "123 Default Street",
-                    city: "Print City",
-                    postalCode: "12345",
-                    country: "US"
-                },
-                paymentMethod: "Stripe",
-                itemsPrice: orderDetails.total,
-                taxPrice: 0.00,
-                shippingPrice: 0.00,
-                totalPrice: orderDetails.total
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            // Simulating a successful network charge and placing order
+            if (method === 'cod') {
+                // Cash on delivery directly places the order
+                await axios.post('http://localhost:5000/api/orders', {
+                    orderItems: orderDetails.cart.map(item => ({
+                        product: item.product,
+                        paperType: item.paper,
+                        finish: item.finish,
+                        quantity: item.quantity,
+                        price: parseFloat(item.price),
+                        designFileUrl: item.artwork
+                    })),
+                    shippingAddress: {
+                        address: "123 Default Street",
+                        city: "Print City",
+                        postalCode: "12345",
+                        country: "EG"
+                    },
+                    paymentMethod: "Cash on Delivery",
+                    itemsPrice: orderDetails.total,
+                    taxPrice: 0.00,
+                    shippingPrice: 0.00,
+                    totalPrice: orderDetails.total
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
 
-            setProcessing(false);
-            onSuccess();
+                setProcessing(false);
+                onSuccess();
+            } else if (method === 'paymob') {
+                // For Paymob, we trigger the backend sequence to get an iframe URL
+                const response = await axios.post('http://localhost:5000/api/orders/paymob/auth', {
+                    amount: orderDetails.total,
+                    cart: orderDetails.cart
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                // Redirect user to the Paymob iframe URL returned by our backend
+                if (response.data && response.data.url) {
+                    window.location.href = response.data.url;
+                } else {
+                    throw new Error("Invalid Paymob response");
+                }
+            }
         } catch (err) {
             console.error(err);
             setError("Failed to create order. Please try again.");
@@ -64,34 +70,27 @@ const CheckoutForm = ({ clientSecret, orderDetails, onSuccess }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={(e) => handleSubmit(e, orderDetails.method)} className="space-y-6">
             <div className="bg-white p-6 rounded-xl border border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                    <CreditCard className="w-5 h-5 mr-2 text-brand-dark" />
-                    Payment Details
+                    Payment Instructions
                 </h3>
-                <div className="p-4 border border-gray-300 rounded-md bg-gray-50">
-                    <CardElement options={{
-                        style: {
-                            base: {
-                                fontSize: '16px',
-                                color: '#424770',
-                                '::placeholder': { color: '#aab7c4' },
-                            },
-                        },
-                    }} />
+                <div className="p-4 border border-gray-300 rounded-md bg-gray-50 text-gray-600">
+                    {orderDetails.method === 'cod'
+                        ? "You will pay for your order in cash upon delivery."
+                        : "You will be redirected to the secure Paymob gateway to complete your credit card payment."}
                 </div>
                 {error && <div className="mt-4 text-sm text-red-600">{error}</div>}
             </div>
-
             <button
-                disabled={processing || !stripe}
-                className="w-full bg-brand-dark text-white py-4 rounded-lg font-bold text-lg hover:bg-gray-800 transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center"
+                disabled={processing}
+                className={`w-full text-white py-4 rounded-lg font-bold text-lg transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center ${orderDetails.method === 'cod' ? 'bg-green-600 hover:bg-green-700' : 'bg-brand-dark hover:bg-gray-800'
+                    }`}
             >
                 {processing ? (
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 ) : (
-                    `Pay $${orderDetails.total}`
+                    orderDetails.method === 'cod' ? `Place Order ($${orderDetails.total})` : `Pay with Paymob ($${orderDetails.total})`
                 )}
             </button>
         </form>
@@ -102,8 +101,8 @@ export default function Checkout() {
     const { cart, getCartTotal, clearCart } = useContext(CartContext);
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
-    const [clientSecret, setClientSecret] = useState('');
     const [success, setSuccess] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('cod');
 
     const amount = getCartTotal();
 
@@ -111,10 +110,7 @@ export default function Checkout() {
         if (cart.length === 0 && !success) {
             navigate('/cart');
         }
-        // In a real app, you'd fetch the checkout intent from the server here
-        // fetch('/api/orders/create-intent', ...)
-        setClientSecret('mock_secret_' + Math.random());
-    }, []);
+    }, [cart, success, navigate]);
 
     if (success) {
         return (
@@ -148,14 +144,54 @@ export default function Checkout() {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-8">
-                    <div className="flex-1">
-                        <Elements stripe={stripePromise}>
-                            <CheckoutForm
-                                clientSecret={clientSecret}
-                                orderDetails={{ total: amount, cart }}
-                                onSuccess={() => setSuccess(true)}
-                            />
-                        </Elements>
+                    <div className="flex-1 space-y-6">
+                        <div className="bg-white p-6 rounded-xl border border-gray-200">
+                            <h3 className="text-lg font-medium text-gray-900 mb-6 flex items-center">
+                                Select Payment Method
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* COD Option */}
+                                <div
+                                    className={`relative border rounded-xl p-4 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-brand-dark bg-brand-dark/5 ring-2 ring-brand-dark' : 'border-gray-200 hover:border-gray-300'
+                                        }`}
+                                    onClick={() => setPaymentMethod('cod')}
+                                >
+                                    <div className="flex flex-col h-full">
+                                        <Banknote className={`w-8 h-8 mb-3 ${paymentMethod === 'cod' ? 'text-brand-dark' : 'text-gray-400'}`} />
+                                        <span className={`font-bold ${paymentMethod === 'cod' ? 'text-brand-dark' : 'text-gray-700'}`}>Cash on Delivery</span>
+                                        <span className="text-sm text-gray-500 mt-1">Pay with cash when your order arrives.</span>
+                                    </div>
+                                    {paymentMethod === 'cod' && (
+                                        <div className="absolute top-4 right-4 text-brand-dark">
+                                            <CheckCircle2 className="w-5 h-5 fill-current" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Paymob Option */}
+                                <div
+                                    className={`relative border rounded-xl p-4 cursor-pointer transition-all ${paymentMethod === 'paymob' ? 'border-brand-dark bg-brand-dark/5 ring-2 ring-brand-dark' : 'border-gray-200 hover:border-gray-300'
+                                        }`}
+                                    onClick={() => setPaymentMethod('paymob')}
+                                >
+                                    <div className="flex flex-col h-full">
+                                        <CreditCard className={`w-8 h-8 mb-3 ${paymentMethod === 'paymob' ? 'text-brand-dark' : 'text-gray-400'}`} />
+                                        <span className={`font-bold ${paymentMethod === 'paymob' ? 'text-brand-dark' : 'text-gray-700'}`}>Credit/Debit Card</span>
+                                        <span className="text-sm text-gray-500 mt-1">Secure payment via Paymob network.</span>
+                                    </div>
+                                    {paymentMethod === 'paymob' && (
+                                        <div className="absolute top-4 right-4 text-brand-dark">
+                                            <CheckCircle2 className="w-5 h-5 fill-current" />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <CheckoutForm
+                            orderDetails={{ total: amount, cart, method: paymentMethod }}
+                            onSuccess={() => setSuccess(true)}
+                        />
                     </div>
 
                     <div className="w-full md:w-96">
