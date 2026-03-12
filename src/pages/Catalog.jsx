@@ -1,59 +1,75 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { SettingsContext } from '../context/SettingsContext';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Printer, Image as ImageIcon, Map, FileText, ChevronRight } from 'lucide-react';
 
-const products = [
-    {
-        id: 'business-cards',
-        name: 'Business Cards',
-        description: 'Make a lasting first impression with premium quality business cards.',
-        icon: FileText,
-        price: 'From $15',
-        features: ['14pt & 16pt cardstock', 'Matte or Glossy finish', 'Standard and Custom sizes']
-    },
-    {
-        id: 'posters',
-        name: 'Posters',
-        description: 'Stand out from the crowd with vibrant, high-resolution posters.',
-        icon: ImageIcon,
-        price: 'From $25',
-        features: ['High-gloss UV coating', 'Durable paper options', 'Multiple large formats']
-    },
-    {
-        id: 'flyers',
-        name: 'Flyers',
-        description: 'Spread the word quickly with eye-catching and affordable flyers.',
-        icon: Map,
-        price: 'From $20',
-        features: ['Double-sided printing', 'Various folding options', 'Bulk discounts available']
-    },
-    {
-        id: 'banners',
-        name: 'Vinyl Banners',
-        description: 'Durable and weather-resistant banners for both indoor and outdoor use.',
-        icon: Printer,
-        price: 'From $45',
-        features: ['Heavy-duty vinyl', 'Grommets included', 'Fade-resistant ink']
-    }
-];
-
 export default function Catalog() {
+    const { settings } = useContext(SettingsContext);
+    const { t } = useTranslation();
+
+    const defaultProducts = [
+        {
+            id: 'business-cards',
+            name: t('catalogItems.businessCards.name'),
+            description: t('catalogItems.businessCards.desc'),
+            icon: FileText,
+            price: 'From $15',
+            features: [t('catalogItems.businessCards.f1'), t('catalogItems.businessCards.f2'), t('catalogItems.businessCards.f3')]
+        },
+        {
+            id: 'posters',
+            name: t('catalogItems.posters.name'),
+            description: t('catalogItems.posters.desc'),
+            icon: ImageIcon,
+            price: 'From $25',
+            features: [t('catalogItems.posters.f1'), t('catalogItems.posters.f2'), t('catalogItems.posters.f3')]
+        },
+        {
+            id: 'flyers',
+            name: t('catalogItems.flyers.name'),
+            description: t('catalogItems.flyers.desc'),
+            icon: Map,
+            price: 'From $20',
+            features: [t('catalogItems.flyers.f1'), t('catalogItems.flyers.f2'), t('catalogItems.flyers.f3')]
+        },
+        {
+            id: 'banners',
+            name: t('catalogItems.banners.name'),
+            description: t('catalogItems.banners.desc'),
+            icon: Printer,
+            price: 'From $45',
+            features: [t('catalogItems.banners.f1'), t('catalogItems.banners.f2'), t('catalogItems.banners.f3')]
+        }
+    ];
+
+    // Merge dynamic catalog with static defaults for icons & features
+    const displayProducts = settings?.catalog?.length > 0 ? settings.catalog.map(c => {
+        const defaultMatch = defaultProducts.find(p => p.id === c.id);
+        return {
+            ...c,
+            description: c.description || defaultMatch?.description || 'Premium print quality.',
+            icon: defaultMatch?.icon || FileText,
+            features: defaultMatch?.features || ['High Quality Print', 'Custom options available']
+        };
+    }) : defaultProducts;
+
     return (
         <div className="pt-24 pb-16 bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 <div className="text-center max-w-3xl mx-auto mb-16">
                     <h1 className="text-4xl font-extrabold text-brand-dark sm:text-5xl">
-                        Our Print Catalog
+                        {t('catalog.title')}
                     </h1>
                     <p className="mt-4 text-xl text-gray-600">
-                        Explore our wide range of premium printing services designed to elevate your brand.
+                        {t('catalog.subtitle')}
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                    {products.map((product, index) => (
+                    {displayProducts.map((product, index) => (
                         <motion.div
                             key={product.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -86,7 +102,7 @@ export default function Catalog() {
                                 to={`/builder?product=${product.id}`}
                                 className="inline-flex items-center text-brand-red font-bold hover:text-red-700 transition-colors"
                             >
-                                Start Designing <ChevronRight className="ml-1 h-5 w-5" />
+                                {t('catalog.startDesigning')} <ChevronRight className="ml-1 rtl:mr-1 rtl:ml-0 rtl:rotate-180 h-5 w-5" />
                             </Link>
                         </motion.div>
                     ))}

@@ -54,20 +54,24 @@ function AnimatedRoutes() {
     );
 }
 
+import { SettingsProvider } from './context/SettingsContext';
+
 function App() {
     return (
         <AuthProvider>
-            <CartProvider>
-                <Router>
-                    <div className="min-h-screen bg-brand-light flex flex-col">
-                        <Navbar />
-                        <main className="flex-grow flex flex-col items-center">
-                            <AnimatedRoutes />
-                        </main>
-                        <Footer />
-                    </div>
-                </Router>
-            </CartProvider>
+            <SettingsProvider>
+                <CartProvider>
+                    <Router>
+                        <div className="min-h-screen bg-brand-light flex flex-col">
+                            <Navbar />
+                            <main className="flex-grow flex flex-col items-center">
+                                <AnimatedRoutes />
+                            </main>
+                            <Footer />
+                        </div>
+                    </Router>
+                </CartProvider>
+            </SettingsProvider>
         </AuthProvider>
     );
 }

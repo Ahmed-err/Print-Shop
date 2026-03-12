@@ -1,54 +1,61 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { SettingsContext } from '../context/SettingsContext';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star } from 'lucide-react';
 
-const services = [
-    {
-        id: 'business-cards',
-        title: 'Business Cards',
-        description: 'Make a lasting impression with our premium business cards. Available in multiple finishes including matte, gloss, and soft touch.',
-        price: 'From $15.00',
-        image: 'https://images.unsplash.com/photo-1718670013921-2f144aba173a?q=80&w=760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        popular: true
-    },
-    {
-        id: 'posters',
-        title: 'Marketing Posters',
-        description: 'High-quality large format printing for events, promotions, and retail displays. UV resistant inks available.',
-        price: 'From $25.00',
-        image: 'https://images.unsplash.com/photo-1617355405361-29f0f0a3d737?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Ds',
-        popular: true
-    },
-    {
-        id: 'flyers',
-        title: 'Flyers & Leaflets',
-        description: 'Cost-effective mass marketing materials. Choose from various paper weights and folding options.',
-        price: 'From $20.00',
-        image: 'https://images.unsplash.com/photo-1591351659190-6258bbec984d?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        popular: false
-    },
-    {
-        id: 'packaging',
-        title: 'Custom Packaging',
-        description: 'Branded boxes, mailers, and packaging sleeves to elevate your product unboxing experience.',
-        price: 'Custom Quote',
-        image: 'https://images.unsplash.com/photo-1715788089786-4c343fd6d93f?q=80&w=580&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        popular: false
-    }
-];
-
 export default function Services() {
+    const { settings } = useContext(SettingsContext);
+    const { t } = useTranslation();
+
+    const defaultServices = [
+        {
+            id: 'business-cards',
+            title: t('services.items.businessCards.title'),
+            description: t('services.items.businessCards.desc'),
+            price: 'From $15.00',
+            image: 'https://images.unsplash.com/photo-1718670013921-2f144aba173a?q=80&w=760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+            popular: true
+        },
+        {
+            id: 'posters',
+            title: t('services.items.posters.title'),
+            description: t('services.items.posters.desc'),
+            price: 'From $25.00',
+            image: 'https://images.unsplash.com/photo-1617355405361-29f0f0a3d737?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Ds',
+            popular: true
+        },
+        {
+            id: 'flyers',
+            title: t('services.items.flyers.title'),
+            description: t('services.items.flyers.desc'),
+            price: 'From $20.00',
+            image: 'https://images.unsplash.com/photo-1591351659190-6258bbec984d?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+            popular: false
+        },
+        {
+            id: 'packaging',
+            title: t('services.items.packaging.title'),
+            description: t('services.items.packaging.desc'),
+            price: 'Custom Quote',
+            image: 'https://images.unsplash.com/photo-1715788089786-4c343fd6d93f?q=80&w=580&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+            popular: false
+        }
+    ];
+
+    const displayServices = settings?.services?.length > 0 ? settings.services : defaultServices;
+
     return (
         <div className="pt-24 pb-16 bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl md:text-5xl font-bold text-brand-dark mb-4">Our Print Services</h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">Explore our wide range of premium printing options tailored for professionals and businesses.</p>
+                    <h1 className="text-4xl md:text-5xl font-bold text-brand-dark mb-4">{t('services.title')}</h1>
+                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">{t('services.subtitle')}</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
-                    {services.map((service, index) => (
+                    {displayServices.map((service, index) => (
                         <motion.div
                             key={service.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -61,7 +68,7 @@ export default function Services() {
                                 <img src={service.image} alt={service.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                 {service.popular && (
                                     <div className="absolute top-4 left-4 z-20 bg-brand-red text-white text-xs font-bold px-3 py-1 rounded-full flex items-center shadow-md">
-                                        <Star className="h-3 w-3 mr-1 fill-current" /> Popular
+                                        <Star className="h-3 w-3 mr-1 fill-current" /> {t('services.popular')}
                                     </div>
                                 )}
                             </div>
@@ -78,7 +85,7 @@ export default function Services() {
                                         to="/builder"
                                         className="inline-flex items-center justify-center bg-brand-light text-brand-dark border border-gray-200 hover:border-brand-red hover:text-brand-red px-4 py-2 rounded-lg font-medium transition-colors"
                                     >
-                                        Customize <ArrowRight className="ml-2 h-4 w-4" />
+                                        {t('services.customize')} <ArrowRight className="ml-2 rtl:mr-2 rtl:ml-0 rtl:rotate-180 h-4 w-4" />
                                     </Link>
                                 </div>
                             </div>
@@ -87,11 +94,11 @@ export default function Services() {
                 </div>
 
                 <div className="mt-20 bg-brand-dark rounded-3xl p-10 text-center relative overflow-hidden">
-                    <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-64 h-64 bg-brand-red/20 rounded-full blur-3xl" />
-                    <h2 className="text-3xl font-bold text-white mb-4 relative z-10">Don't see what you need?</h2>
-                    <p className="text-gray-300 mb-8 max-w-2xl mx-auto relative z-10">We handle custom bespoke projects all the time. Contact our team to discuss your specific requirements and get a precise quote.</p>
+                    <div className="absolute top-0 right-0 rtl:left-0 rtl:right-auto -translate-y-12 translate-x-1/3 rtl:-translate-x-1/3 w-64 h-64 bg-brand-red/20 rounded-full blur-3xl" />
+                    <h2 className="text-3xl font-bold text-white mb-4 relative z-10">{t('services.bespokeTitle')}</h2>
+                    <p className="text-gray-300 mb-8 max-w-2xl mx-auto relative z-10">{t('services.bespokeSubtitle')}</p>
                     <button className="bg-brand-red text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-red-700 transition-colors shadow-lg relative z-10">
-                        Request Custom Quote
+                        {t('services.requestQuote')}
                     </button>
                 </div>
             </div>
