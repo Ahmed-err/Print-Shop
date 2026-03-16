@@ -10,6 +10,7 @@ import { CartProvider } from './context/CartContext';
 import Home from './pages/Home';
 import Builder from './pages/Builder';
 import Services from './pages/Services';
+import ServiceCategory from './pages/ServiceCategory';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Catalog from './pages/Catalog';
@@ -25,6 +26,7 @@ function AnimatedRoutes() {
             <Routes location={location} key={location.pathname}>
                 <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
                 <Route path="/services" element={<PageWrapper><Services /></PageWrapper>} />
+                <Route path="/services/:id" element={<PageWrapper><ServiceCategory /></PageWrapper>} />
                 <Route path="/catalog" element={<PageWrapper><Catalog /></PageWrapper>} />
                 <Route path="/cart" element={<PageWrapper><Cart /></PageWrapper>} />
                 <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />

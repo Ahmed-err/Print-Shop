@@ -23,7 +23,7 @@ export default function Builder() {
         size: '',
         paper: '',
         finish: '',
-        quantity: 100
+        quantity: 1
     });
 
     const { settings } = useContext(SettingsContext);
@@ -39,15 +39,28 @@ export default function Builder() {
         { id: 'standard', name: t('builderOptions.paper.standard'), multiplier: 1.0 },
         { id: 'premium', name: t('builderOptions.paper.premium'), multiplier: 1.5 }
     ];
-    const paperOptions = bSettings.paperOptions?.length > 0 ? bSettings.paperOptions : defaultPaper;
+    const paperOptions = (bSettings.paperOptions?.length > 0 ? bSettings.paperOptions : defaultPaper).filter(
+        (opt) => opt.enabled !== false
+    );
 
     const defaultFinish = [
         { id: 'matte', name: t('builderOptions.finish.matte'), multiplier: 1.0 },
         { id: 'glossy', name: t('builderOptions.finish.glossy'), multiplier: 1.2 }
     ];
-    const finishOptions = bSettings.finishOptions?.length > 0 ? bSettings.finishOptions : defaultFinish;
+    const finishOptions = (bSettings.finishOptions?.length > 0 ? bSettings.finishOptions : defaultFinish).filter(
+        (opt) => opt.enabled !== false
+    );
 
-    const quantities = bSettings.quantities?.length > 0 ? bSettings.quantities : [100, 250, 500, 1000, 2500];
+    const defaultSizes = [
+        { id: 'a4', name: 'A4 - 21x29.7 cm' },
+        { id: 'a3', name: 'A3 - 29.7x42 cm' },
+        { id: 'a5', name: 'A5 - 14.8x21 cm' }
+    ];
+    const sizeOptions = (bSettings.sizeOptions?.length > 0 ? bSettings.sizeOptions : defaultSizes).filter(
+        (opt) => opt.enabled !== false
+    );
+
+    const quantities = bSettings.quantities?.length > 0 ? bSettings.quantities : [1, 10, 50, 100, 250, 500];
 
     const updateConfig = (key, value) => {
         setConfig({ ...config, [key]: value });
@@ -140,6 +153,24 @@ export default function Builder() {
 
                             {step === 2 && (
                                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pl-11 rtl:pl-0 rtl:pr-11">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{t('builder.sizeLabel')}</label>
+                                        <div className="grid grid-cols-2 gap-4 mb-4">
+                                            {sizeOptions.map((opt) => {
+                                                const val = opt.id;
+                                                return (
+                                                    <button
+                                                        key={val}
+                                                        onClick={() => updateConfig('size', val)}
+                                                        className={`p-4 border rounded-lg text-center ${config.size === val ? 'border-brand-red bg-red-50 text-brand-red' : 'border-gray-200 hover:bg-gray-50'}`}
+                                                    >
+                                                        {opt.name}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">{t('builder.paperQuality')}</label>
                                         <div className="grid grid-cols-2 gap-4">
@@ -263,6 +294,14 @@ export default function Builder() {
                                     <span className="text-gray-400">{t('builder.product')}</span>
                                     <span className="font-medium capitalize">{products.find(p => p.id === config.product)?.name || config.product.replace('-', ' ') || '-'}</span>
                                 </div>
+                                {config.size && (
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-400">{t('builder.sizeLabel')}</span>
+                                        <span className="font-medium capitalize">
+                                            {sizeOptions.find((s) => s.id === config.size)?.name || config.size}
+                                        </span>
+                                    </div>
+                                )}
                                 {config.paper && (
                                     <div className="flex justify-between">
                                         <span className="text-gray-400">{t('builder.paper')}</span>
@@ -275,17 +314,36 @@ export default function Builder() {
                                         <span className="font-medium capitalize">{finishOptions.find(f => f.id === config.finish)?.name || config.finish}</span>
                                     </div>
                                 )}
-                                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-700">
-                                    <span className="text-gray-400">{t('builder.quantity')}</span>
-                                    <select
-                                        value={config.quantity}
-                                        onChange={e => updateConfig('quantity', parseInt(e.target.value))}
-                                        className="bg-gray-800 border-none text-white rounded p-1 text-sm outline-none"
-                                    >
-                                        {quantities.map(q => (
-                                            <option key={q} value={q}>{q}</option>
-                                        ))}
-                                    </select>
+                                <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-700">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">{t('builder.quantity')}</span>
+                                        <select
+                                            value={quantities.includes(config.quantity) ? config.quantity : ''}
+                                            onChange={e => {
+                                                const val = parseInt(e.target.value || '0', 10);
+                                                if (val > 0) updateConfig('quantity', val);
+                                            }}
+                                            className="bg-gray-800 border-none text-white rounded p-1 text-sm outline-none"
+                                        >
+                                            <option value="">{t('builder.customQuantityPlaceholder')}</option>
+                                            {quantities.map(q => (
+                                                <option key={q} value={q}>{q}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="text-xs text-gray-400">{t('builder.customQuantityLabel')}</span>
+                                        <input
+                                            type="number"
+                                            min={1}
+                                            value={config.quantity}
+                                            onChange={e => {
+                                                const val = parseInt(e.target.value || '1', 10);
+                                                updateConfig('quantity', isNaN(val) || val < 1 ? 1 : val);
+                                            }}
+                                            className="w-24 bg-gray-800 border border-gray-600 text-white rounded px-2 py-1 text-sm outline-none"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

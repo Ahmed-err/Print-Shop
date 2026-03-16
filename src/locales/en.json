@@ -114,6 +114,7 @@
     "product": "Product",
     "paper": "Paper",
     "finishLabel": "Finish",
+    "sizeLabel": "Paper Size",
     "quantity": "Quantity",
     "total": "Total",
     "addToCart": "Add to Cart",
@@ -130,7 +131,9 @@
     "noReviews": "No reviews yet for this product. Be the first!",
     "alertNoArtwork": "Please upload your artwork before continuing.",
     "alertUploadFailed": "Upload failed. Please try again.",
-    "alertSubmitReviewFailed": "Error submitting review"
+    "alertSubmitReviewFailed": "Error submitting review",
+    "customQuantityLabel": "Or enter a specific quantity",
+    "customQuantityPlaceholder": "Choose preset"
   },
   "catalog": {
     "title": "Our Print Catalog",
@@ -161,6 +164,28 @@
       "packaging": {
         "title": "Custom Packaging",
         "desc": "Branded boxes, mailers, and packaging sleeves to elevate your product unboxing experience."
+      }
+    },
+    "categories": {
+      "printCut": {
+        "title": "Print & Cut",
+        "desc": "High-precision printing and cutting for cards, stickers, labels, packaging mockups and more.",
+        "price": "From $15.00"
+      },
+      "maps": {
+        "title": "Maps & Large Format",
+        "desc": "Wide-format printing for maps, plans, architectural drawings and technical documents.",
+        "price": "From $20.00"
+      },
+      "copyCenter": {
+        "title": "Copy Center",
+        "desc": "Fast scanning and copying for documents, booklets, reports and study materials.",
+        "price": "From $5.00"
+      },
+      "customPrinting": {
+        "title": "Custom Printing",
+        "desc": "Personalized printing for t-shirts, mugs, gifts and branded merchandise.",
+        "price": "Custom Quote"
       }
     }
   },

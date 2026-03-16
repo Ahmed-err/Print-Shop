@@ -196,7 +196,7 @@ export default function SettingsControl() {
     );
 
     const renderBuilderSettings = () => {
-        const b = localSettings.builder || { products: [], paperOptions: [], finishOptions: [], quantities: [] };
+        const b = localSettings.builder || { products: [], paperOptions: [], finishOptions: [], sizeOptions: [], quantities: [] };
 
         return (
             <div className="space-y-10">
@@ -229,13 +229,22 @@ export default function SettingsControl() {
                     <p className="text-sm text-gray-500 mb-4">Multipliers compound against the base price (e.g. 1.0 = 100%, 1.5 = +50%)</p>
                     <div className="grid gap-4">
                         {b.paperOptions.map((po, idx) => (
-                            <div key={idx} className="flex gap-4 items-center bg-gray-50 p-4 rounded-lg border">
-                                <input type="text" placeholder="ID (e.g. premium)" className="w-1/4 p-2 border rounded" value={po.id || ''} onChange={(e) => updateArrayItem('builder.paperOptions', idx, 'id', e.target.value)} />
-                                <input type="text" placeholder="Display Name" className="flex-1 p-2 border rounded" value={po.name || ''} onChange={(e) => updateArrayItem('builder.paperOptions', idx, 'name', e.target.value)} />
+                            <div key={idx} className="flex flex-wrap gap-4 items-center bg-gray-50 p-4 rounded-lg border">
+                                <input type="text" placeholder="ID (e.g. premium)" className="w-28 p-2 border rounded" value={po.id || ''} onChange={(e) => updateArrayItem('builder.paperOptions', idx, 'id', e.target.value)} />
+                                <input type="text" placeholder="Display Name" className="flex-1 min-w-[150px] p-2 border rounded" value={po.name || ''} onChange={(e) => updateArrayItem('builder.paperOptions', idx, 'name', e.target.value)} />
                                 <div className="flex items-center gap-2">
                                     <span className="text-gray-500">x</span>
                                     <input type="number" step="0.1" className="w-24 p-2 border rounded" value={po.multiplier || 1} onChange={(e) => updateArrayItem('builder.paperOptions', idx, 'multiplier', parseFloat(e.target.value))} />
                                 </div>
+                                <label className="flex items-center gap-2 text-sm text-gray-600">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded"
+                                        checked={po.enabled !== false}
+                                        onChange={(e) => updateArrayItem('builder.paperOptions', idx, 'enabled', e.target.checked)}
+                                    />
+                                    Show in calculator
+                                </label>
                                 <button onClick={() => removeArrayItem('builder.paperOptions', idx)} className="p-2 text-red-500 hover:bg-red-50 rounded">
                                     <Trash2 size={20} />
                                 </button>
@@ -252,13 +261,22 @@ export default function SettingsControl() {
                     <h3 className="text-lg font-bold mb-4 border-b pb-2">Builder Calculator: Finish Options</h3>
                     <div className="grid gap-4">
                         {b.finishOptions.map((fo, idx) => (
-                            <div key={idx} className="flex gap-4 items-center bg-gray-50 p-4 rounded-lg border">
-                                <input type="text" placeholder="ID" className="w-1/4 p-2 border rounded" value={fo.id || ''} onChange={(e) => updateArrayItem('builder.finishOptions', idx, 'id', e.target.value)} />
-                                <input type="text" placeholder="Display Name" className="flex-1 p-2 border rounded" value={fo.name || ''} onChange={(e) => updateArrayItem('builder.finishOptions', idx, 'name', e.target.value)} />
+                            <div key={idx} className="flex flex-wrap gap-4 items-center bg-gray-50 p-4 rounded-lg border">
+                                <input type="text" placeholder="ID" className="w-28 p-2 border rounded" value={fo.id || ''} onChange={(e) => updateArrayItem('builder.finishOptions', idx, 'id', e.target.value)} />
+                                <input type="text" placeholder="Display Name" className="flex-1 min-w-[150px] p-2 border rounded" value={fo.name || ''} onChange={(e) => updateArrayItem('builder.finishOptions', idx, 'name', e.target.value)} />
                                 <div className="flex items-center gap-2">
                                     <span className="text-gray-500">x</span>
                                     <input type="number" step="0.1" className="w-24 p-2 border rounded" value={fo.multiplier || 1} onChange={(e) => updateArrayItem('builder.finishOptions', idx, 'multiplier', parseFloat(e.target.value))} />
                                 </div>
+                                <label className="flex items-center gap-2 text-sm text-gray-600">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded"
+                                        checked={fo.enabled !== false}
+                                        onChange={(e) => updateArrayItem('builder.finishOptions', idx, 'enabled', e.target.checked)}
+                                    />
+                                    Show in calculator
+                                </label>
                                 <button onClick={() => removeArrayItem('builder.finishOptions', idx)} className="p-2 text-red-500 hover:bg-red-50 rounded">
                                     <Trash2 size={20} />
                                 </button>
@@ -267,6 +285,49 @@ export default function SettingsControl() {
                     </div>
                     <button onClick={() => addArrayItem('builder.finishOptions', { id: 'new-finish', name: 'New Finish', multiplier: 1.0 })} className="mt-4 flex items-center gap-2 text-brand-red font-bold py-2 px-4 border border-brand-red rounded hover:bg-red-50">
                         <Plus size={16} /> Add Finish Option
+                    </button>
+                </div>
+
+                {/* Paper Sizes */}
+                <div>
+                    <h3 className="text-lg font-bold mb-4 border-b pb-2">Builder Calculator: Paper Sizes</h3>
+                    <div className="grid gap-4">
+                        {b.sizeOptions?.map((so, idx) => (
+                            <div key={idx} className="flex flex-wrap gap-4 items-center bg-gray-50 p-4 rounded-lg border">
+                                <input
+                                    type="text"
+                                    placeholder="ID (e.g. a4)"
+                                    className="w-28 p-2 border rounded"
+                                    value={so.id || ''}
+                                    onChange={(e) => updateArrayItem('builder.sizeOptions', idx, 'id', e.target.value)}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Display Name (e.g. A4 - 21x29.7 cm)"
+                                    className="flex-1 min-w-[150px] p-2 border rounded"
+                                    value={so.name || ''}
+                                    onChange={(e) => updateArrayItem('builder.sizeOptions', idx, 'name', e.target.value)}
+                                />
+                                <label className="flex items-center gap-2 text-sm text-gray-600">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded"
+                                        checked={so.enabled !== false}
+                                        onChange={(e) => updateArrayItem('builder.sizeOptions', idx, 'enabled', e.target.checked)}
+                                    />
+                                    Show in calculator
+                                </label>
+                                <button onClick={() => removeArrayItem('builder.sizeOptions', idx)} className="p-2 text-red-500 hover:bg-red-50 rounded">
+                                    <Trash2 size={20} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                    <button
+                        onClick={() => addArrayItem('builder.sizeOptions', { id: 'a4', name: 'A4 - 21x29.7 cm', enabled: true })}
+                        className="mt-4 flex items-center gap-2 text-brand-red font-bold py-2 px-4 border border-brand-red rounded hover:bg-red-50"
+                    >
+                        <Plus size={16} /> Add Paper Size
                     </button>
                 </div>
 

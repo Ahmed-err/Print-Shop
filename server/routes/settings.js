@@ -18,32 +18,36 @@ const seedInitialSettings = async () => {
                 ],
                 services: [
                     {
-                        id: 's1',
-                        title: 'Business Cards',
-                        description: 'Premium business cards that make a lasting impression. Available in various finishes and paper types.',
+                        id: 'print-cut',
+                        title: 'Print & Cut',
+                        description: 'High-precision printing and cutting for cards, stickers, labels, packaging mockups and more.',
                         price: 'From $15.00',
-                        image: 'https://images.unsplash.com/photo-1718670013921-2f144aba173a?q=80&w=760&auto=format&fit=crop'
+                        image: 'https://images.pexels.com/photos/7054779/pexels-photo-7054779.jpeg?auto=compress&cs=tinysrgb&w=800',
+                        productIds: ['business-cards', 'flyers']
                     },
                     {
-                        id: 's2',
-                        title: 'Marketing Flyers',
-                        description: 'High-quality flyers designed to grab attention. Choose from multiple sizes, folds, and glossy or matte finishes.',
-                        price: 'From $25.00',
-                        image: 'https://images.unsplash.com/photo-1617355405361-29f0f0a3d737?q=80&w=387&auto=format&fit=crop'
-                    },
-                    {
-                        id: 's3',
-                        title: 'Custom Posters',
-                        description: 'Vibrant, large-format posters for events, promotions, or decor. Printed on premium photo-quality paper.',
+                        id: 'maps',
+                        title: 'Maps & Large Format',
+                        description: 'Wide-format printing for maps, plans, architectural drawings and technical documents.',
                         price: 'From $20.00',
-                        image: 'https://images.unsplash.com/photo-1591351659190-6258bbec984d?q=80&w=387&auto=format&fit=crop'
+                        image: 'https://images.pexels.com/photos/1051075/pexels-photo-1051075.jpeg?auto=compress&cs=tinysrgb&w=800',
+                        productIds: ['posters']
                     },
                     {
-                        id: 's4',
-                        title: 'Banners & Signs',
-                        description: 'Durable indoor and outdoor banners. Ideal for store fronts, trade shows, and special events.',
+                        id: 'copy-center',
+                        title: 'Copy Center',
+                        description: 'Fast scanning and copying for documents, booklets, reports and study materials.',
+                        price: 'From $5.00',
+                        image: 'https://images.pexels.com/photos/7054785/pexels-photo-7054785.jpeg?auto=compress&cs=tinysrgb&w=800',
+                        productIds: ['flyers']
+                    },
+                    {
+                        id: 'custom-printing',
+                        title: 'Custom Printing',
+                        description: 'Personalized printing for t‑shirts, mugs, gifts and branded merchandise.',
                         price: 'Custom Quote',
-                        image: 'https://images.unsplash.com/photo-1715788089786-4c343fd6d93f?q=80&w=580&auto=format&fit=crop'
+                        image: 'https://images.pexels.com/photos/3965545/pexels-photo-3965545.jpeg?auto=compress&cs=tinysrgb&w=800',
+                        productIds: ['business-cards']
                     }
                 ],
                 catalog: [
