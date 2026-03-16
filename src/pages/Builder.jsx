@@ -30,20 +30,20 @@ export default function Builder() {
     const bSettings = settings?.builder || {};
 
     const products = bSettings.products?.length > 0 ? bSettings.products : [
-        { id: 'business-cards', name: t('builderOptions.products.business-cards', 'Business Cards'), basePrice: 15 },
-        { id: 'posters', name: t('builderOptions.products.posters', 'Posters'), basePrice: 25 },
-        { id: 'flyers', name: t('builderOptions.products.flyers', 'Flyers'), basePrice: 20 },
+        { id: 'business-cards', name: t('builderOptions.products.business-cards'), basePrice: 15 },
+        { id: 'posters', name: t('builderOptions.products.posters'), basePrice: 25 },
+        { id: 'flyers', name: t('builderOptions.products.flyers'), basePrice: 20 },
     ];
 
     const defaultPaper = [
-        { id: 'standard', name: t('builderOptions.paper.standard', 'Standard (14pt)'), multiplier: 1.0 },
-        { id: 'premium', name: t('builderOptions.paper.premium', 'Premium (16pt)'), multiplier: 1.5 }
+        { id: 'standard', name: t('builderOptions.paper.standard'), multiplier: 1.0 },
+        { id: 'premium', name: t('builderOptions.paper.premium'), multiplier: 1.5 }
     ];
     const paperOptions = bSettings.paperOptions?.length > 0 ? bSettings.paperOptions : defaultPaper;
 
     const defaultFinish = [
-        { id: 'matte', name: t('builderOptions.finish.matte', 'Matte'), multiplier: 1.0 },
-        { id: 'glossy', name: t('builderOptions.finish.glossy', 'Glossy'), multiplier: 1.2 }
+        { id: 'matte', name: t('builderOptions.finish.matte'), multiplier: 1.0 },
+        { id: 'glossy', name: t('builderOptions.finish.glossy'), multiplier: 1.2 }
     ];
     const finishOptions = bSettings.finishOptions?.length > 0 ? bSettings.finishOptions : defaultFinish;
 
@@ -58,7 +58,7 @@ export default function Builder() {
         if (config.product) {
             axios.get(`http://localhost:5000/api/reviews/${config.product}`)
                 .then(res => setReviews(res.data))
-                .catch(err => console.error("Could not fetch reviews", err));
+                .catch(err => console.error('Could not fetch reviews', err));
         } else {
             setReviews([]);
         }
@@ -82,7 +82,7 @@ export default function Builder() {
             setReviews([res.data, ...reviews]);
             setNewReview({ rating: 5, comment: '' });
         } catch (err) {
-            alert(err.response?.data?.message || 'Error submitting review');
+            alert(err.response?.data?.message || t('builder.alertSubmitReviewFailed'));
         } finally {
             setSubmittingReview(false);
         }

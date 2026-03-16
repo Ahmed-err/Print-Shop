@@ -129,7 +129,8 @@
     "postReview": "Post Review",
     "noReviews": "No reviews yet for this product. Be the first!",
     "alertNoArtwork": "Please upload your artwork before continuing.",
-    "alertUploadFailed": "Upload failed. Please try again."
+    "alertUploadFailed": "Upload failed. Please try again.",
+    "alertSubmitReviewFailed": "Error submitting review"
   },
   "catalog": {
     "title": "Our Print Catalog",
