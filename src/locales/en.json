@@ -96,5 +96,142 @@
     "mobileNumber": "Mobile Number / Identifier",
     "placeOrder": "Place Order",
     "processing": "Processing..."
+  },
+  "builder": {
+    "title": "Configure Your Print",
+    "subtitle": "Customize your order to exact specifications.",
+    "step1": "Select Product",
+    "step2": "Details",
+    "paperQuality": "Paper Quality",
+    "finish": "Finish",
+    "continueUpload": "Continue to Upload",
+    "step3": "Upload Artwork",
+    "uploadSuccess": "File Uploaded Successfully",
+    "dropDesign": "Drop your design here",
+    "acceptedFiles": "PDF, AI, PSD, or High-Res JPG/PNG",
+    "browseFiles": "Browse Files",
+    "orderSummary": "Order Summary",
+    "product": "Product",
+    "paper": "Paper",
+    "finishLabel": "Finish",
+    "sizeLabel": "Paper Size",
+    "quantity": "Quantity",
+    "total": "Total",
+    "addToCart": "Add to Cart",
+    "customerReviews": "Customer Reviews",
+    "totalReviews": "total",
+    "leaveReview": "Leave a Review",
+    "loginToReview": "You must be logged in to leave a review.",
+    "loginNow": "Log in now",
+    "rating": "Rating",
+    "feedback": "Your Feedback",
+    "feedbackPlaceholder": "Tell us what you think about the print quality...",
+    "submitting": "Submitting...",
+    "postReview": "Post Review",
+    "noReviews": "No reviews yet for this product. Be the first!",
+    "alertNoArtwork": "Please upload your artwork before continuing.",
+    "alertUploadFailed": "Upload failed. Please try again.",
+    "alertSubmitReviewFailed": "Error submitting review",
+    "customQuantityLabel": "Or enter a specific quantity",
+    "customQuantityPlaceholder": "Choose preset"
+  },
+  "catalog": {
+    "title": "Our Print Catalog",
+    "subtitle": "Explore our wide range of premium printing services designed to elevate your brand.",
+    "startDesigning": "Start Designing"
+  },
+  "services": {
+    "title": "Our Print Services",
+    "subtitle": "Explore our wide range of premium printing options tailored for professionals and businesses.",
+    "popular": "Popular",
+    "customize": "Customize",
+    "bespokeTitle": "Don't see what you need?",
+    "bespokeSubtitle": "We handle custom bespoke projects all the time. Contact our team to discuss your specific requirements and get a precise quote.",
+    "requestQuote": "Request Custom Quote",
+    "items": {
+      "businessCards": {
+        "title": "Business Cards",
+        "desc": "Make a lasting impression with our premium business cards. Available in multiple finishes including matte, gloss, and soft touch."
+      },
+      "posters": {
+        "title": "Marketing Posters",
+        "desc": "High-quality large format printing for events, promotions, and retail displays. UV resistant inks available."
+      },
+      "flyers": {
+        "title": "Flyers & Leaflets",
+        "desc": "Cost-effective mass marketing materials. Choose from various paper weights and folding options."
+      },
+      "packaging": {
+        "title": "Custom Packaging",
+        "desc": "Branded boxes, mailers, and packaging sleeves to elevate your product unboxing experience."
+      }
+    },
+    "categories": {
+      "printCut": {
+        "title": "Print & Cut",
+        "desc": "High-precision printing and cutting for cards, stickers, labels, packaging mockups and more.",
+        "price": "From $15.00"
+      },
+      "maps": {
+        "title": "Maps & Large Format",
+        "desc": "Wide-format printing for maps, plans, architectural drawings and technical documents.",
+        "price": "From $20.00"
+      },
+      "copyCenter": {
+        "title": "Copy Center",
+        "desc": "Fast scanning and copying for documents, booklets, reports and study materials.",
+        "price": "From $5.00"
+      },
+      "customPrinting": {
+        "title": "Custom Printing",
+        "desc": "Personalized printing for t-shirts, mugs, gifts and branded merchandise.",
+        "price": "Custom Quote"
+      }
+    }
+  },
+  "catalogItems": {
+    "businessCards": {
+      "name": "Business Cards",
+      "desc": "Make a lasting first impression with premium quality business cards.",
+      "f1": "14pt & 16pt cardstock",
+      "f2": "Matte or Glossy finish",
+      "f3": "Standard and Custom sizes"
+    },
+    "posters": {
+      "name": "Posters",
+      "desc": "Stand out from the crowd with vibrant, high-resolution posters.",
+      "f1": "High-gloss UV coating",
+      "f2": "Durable paper options",
+      "f3": "Multiple large formats"
+    },
+    "flyers": {
+      "name": "Flyers",
+      "desc": "Spread the word quickly with eye-catching and affordable flyers.",
+      "f1": "Double-sided printing",
+      "f2": "Various folding options",
+      "f3": "Bulk discounts available"
+    },
+    "banners": {
+      "name": "Vinyl Banners",
+      "desc": "Durable and weather-resistant banners for both indoor and outdoor use.",
+      "f1": "Heavy-duty vinyl",
+      "f2": "Grommets included",
+      "f3": "Fade-resistant ink"
+    }
+  },
+  "builderOptions": {
+    "products": {
+      "business-cards": "Business Cards",
+      "posters": "Posters",
+      "flyers": "Flyers"
+    },
+    "paper": {
+      "standard": "Standard (14pt)",
+      "premium": "Premium (16pt)"
+    },
+    "finish": {
+      "matte": "Matte",
+      "glossy": "Glossy"
+    }
   }
 }

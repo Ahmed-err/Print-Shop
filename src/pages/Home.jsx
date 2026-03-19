@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { SettingsContext } from '../context/SettingsContext';
 import { motion } from 'framer-motion';
 import { ArrowRight, Zap, Upload, Sliders, ShieldCheck, Truck, Star, CheckCircle, Award, Clock, Users, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -6,6 +7,18 @@ import { useTranslation } from 'react-i18next';
 
 export default function Home() {
     const { t } = useTranslation();
+    const { settings } = useContext(SettingsContext);
+
+    const defaultServices = [
+        { title: t('home.service1Title'), desc: t('home.service1Desc'), img: 'https://images.pexels.com/photos/6214474/pexels-photo-6214474.jpeg?auto=compress&cs=tinysrgb&w=800' },
+        { title: t('home.service2Title'), desc: t('home.service2Desc'), img: 'https://images.pexels.com/photos/1779487/pexels-photo-1779487.jpeg?auto=compress&cs=tinysrgb&w=800' },
+        { title: t('home.service3Title'), desc: t('home.service3Desc'), img: 'https://images.pexels.com/photos/6214476/pexels-photo-6214476.jpeg?auto=compress&cs=tinysrgb&w=800' },
+    ];
+
+    const displayServices = settings?.services?.length > 0 ? settings.services.slice(0, 3) : defaultServices;
+    const heroRightImage = settings?.heroImages?.[0] || 'https://images.pexels.com/photos/1250346/pexels-photo-1250346.jpeg?auto=compress&cs=tinysrgb&w=800';
+    const heroTopBadgeImage = settings?.heroImages?.[1] || 'https://images.pexels.com/photos/7054780/pexels-photo-7054780.jpeg?auto=compress&cs=tinysrgb&w=500';
+    const heroBotBadgeImage = settings?.heroImages?.[2] || 'https://images.pexels.com/photos/6214472/pexels-photo-6214472.jpeg?auto=compress&cs=tinysrgb&w=600';
 
     const STATS = [
         { value: '12K+', label: t('home.statsCustomers'), icon: <Users className="h-6 w-6" /> },
@@ -21,11 +34,7 @@ export default function Home() {
         { icon: <Truck className="h-8 w-8 text-brand-dark" />, title: t('home.step4Title'), desc: t('home.step4Desc') },
     ];
 
-    const SERVICES = [
-        { title: t('home.service1Title'), desc: t('home.service1Desc'), img: 'https://images.pexels.com/photos/6214474/pexels-photo-6214474.jpeg?auto=compress&cs=tinysrgb&w=800' },
-        { title: t('home.service2Title'), desc: t('home.service2Desc'), img: 'https://images.pexels.com/photos/1779487/pexels-photo-1779487.jpeg?auto=compress&cs=tinysrgb&w=800' },
-        { title: t('home.service3Title'), desc: t('home.service3Desc'), img: 'https://images.pexels.com/photos/6214476/pexels-photo-6214476.jpeg?auto=compress&cs=tinysrgb&w=800' },
-    ];
+
 
     const FEATURES = [
         { icon: <Award className="h-8 w-8 text-brand-red" />, title: t('home.feat1Title'), desc: t('home.feat1Desc') },
@@ -120,7 +129,7 @@ export default function Home() {
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[310px] h-[440px] rounded-2xl shadow-2xl overflow-hidden z-20 border-[3px] border-white group"
                         >
                             <div className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-700"
-                                style={{ backgroundImage: "url('https://images.pexels.com/photos/1250346/pexels-photo-1250346.jpeg?auto=compress&cs=tinysrgb&w=800')" }}
+                                style={{ backgroundImage: `url('${heroRightImage}')` }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent" />
                             <div className="absolute bottom-6 left-6 text-white z-10 rtl:left-auto rtl:right-6">
@@ -138,7 +147,7 @@ export default function Home() {
                             className="absolute top-[8%] left-[0%] w-52 rounded-xl shadow-xl overflow-hidden z-30 border-2 border-white -rotate-6 group"
                         >
                             <div className="w-full h-32 bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
-                                style={{ backgroundImage: "url('https://images.pexels.com/photos/7054780/pexels-photo-7054780.jpeg?auto=compress&cs=tinysrgb&w=500')" }}
+                                style={{ backgroundImage: `url('${heroTopBadgeImage}')` }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-black/20 to-transparent p-3 flex flex-col justify-end">
                                 <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded w-max mb-1 uppercase tracking-wider">{t('home.inStock')}</span>
@@ -154,7 +163,7 @@ export default function Home() {
                             className="absolute bottom-[12%] right-[1%] w-60 rounded-xl shadow-2xl overflow-hidden z-30 border-2 border-white rotate-6 group"
                         >
                             <div className="w-full h-36 bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
-                                style={{ backgroundImage: "url('https://images.pexels.com/photos/6214472/pexels-photo-6214472.jpeg?auto=compress&cs=tinysrgb&w=600')" }}
+                                style={{ backgroundImage: `url('${heroBotBadgeImage}')` }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-black/20 to-transparent p-3 flex flex-col justify-end">
                                 <span className="bg-brand-red text-white text-[10px] font-bold px-2 py-0.5 rounded w-max mb-1 uppercase tracking-wider">{t('home.bestSeller')}</span>
@@ -245,12 +254,12 @@ export default function Home() {
                         <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="text-xl text-gray-500 max-w-2xl mx-auto">{t('home.servicesSubtitle')}</motion.p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8">
-                        {SERVICES.map((s, i) => (
+                        {displayServices.map((s, i) => (
                             <motion.div key={i} initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.6, delay: i * 0.15 }} whileHover={{ y: -8 }} className="group rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-brand-dark/10 border border-gray-100 bg-white transition-all duration-300">
                                 <div className="h-60 overflow-hidden relative">
                                     <div className="absolute inset-0 bg-brand-dark/10 group-hover:bg-transparent transition-colors duration-500 z-10" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                    <div className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-700" style={{ backgroundImage: `url('${s.img}')` }} />
+                                    <div className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-700" style={{ backgroundImage: `url('${s.image || s.img}')` }} />
                                 </div>
                                 <div className="p-6">
                                     <h3 className="text-xl font-bold text-brand-dark mb-2">{s.title}</h3>

@@ -20,11 +20,14 @@ const uploadRoutes = require('./routes/upload');
 const orderRoutes = require('./routes/order');
 const adminRoutes = require('./routes/admin');
 const reviewRoutes = require('./routes/reviews');
+const settingsRoutes = require('./routes/settings');
+
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Static Uploads Folder
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));

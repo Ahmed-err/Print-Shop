@@ -61,7 +61,44 @@ export default function Navbar() {
                     {/* Desktop nav links */}
                     <div className="hidden md:flex items-center gap-8">
                         <Link to="/catalog" className="text-gray-600 hover:text-brand-red font-medium transition-colors">{t('nav.catalog')}</Link>
-                        <Link to="/services" className="text-gray-600 hover:text-brand-red font-medium transition-colors">{t('nav.services')}</Link>
+                        <div className="relative group">
+                            <button className="inline-flex items-center gap-1 text-gray-600 hover:text-brand-red font-medium transition-colors">
+                                {t('nav.services')}
+                                <ChevronRight className={`h-4 w-4 transition-transform ${isAr ? '-rotate-90' : 'rotate-90'}`} />
+                            </button>
+                            <div className={`invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute ${isAr ? 'right-0' : 'left-0'} mt-3 w-64 bg-white shadow-xl rounded-2xl border border-gray-100 py-3 z-40`}>
+                                <Link
+                                    to="/services"
+                                    className="block px-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-[0.16em] hover:bg-gray-50"
+                                >
+                                    {t('home.servicesTag')}
+                                </Link>
+                                <Link
+                                    to="/services/print-cut"
+                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red"
+                                >
+                                    Print &amp; Cut
+                                </Link>
+                                <Link
+                                    to="/services/maps"
+                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red"
+                                >
+                                    Maps
+                                </Link>
+                                <Link
+                                    to="/services/copy-center"
+                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red"
+                                >
+                                    Copy Center
+                                </Link>
+                                <Link
+                                    to="/services/custom-printing"
+                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red"
+                                >
+                                    Custom Printing
+                                </Link>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Desktop right section */}
