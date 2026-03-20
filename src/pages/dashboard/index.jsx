@@ -47,7 +47,10 @@ export default function Dashboard() {
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900">{user?.name}</h1>
-                            <p className="text-gray-500">{user?.email}</p>
+                            <div className="flex flex-col text-gray-500">
+                                <span>{user?.email}</span>
+                                <span>{user?.phone}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

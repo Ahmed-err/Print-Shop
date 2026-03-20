@@ -11,15 +11,21 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    phone: {
+        type: String,
+        unique: true,
+        sparse: true, // allow multiple nulls
+    },
     password: {
         type: String,
-        required: true,
     },
     role: {
         type: String,
         enum: ['user', 'admin'],
         default: 'user',
-    }
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
 }, { timestamps: true });
 
 // Hash password before saving
@@ -36,6 +42,20 @@ userSchema.pre('save', async function () {
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
+};
+
+userSchema.methods.getResetPasswordToken = function () {
+    const crypto = require('crypto');
+    const resetToken = crypto.randomBytes(20).toString('hex');
+
+    this.resetPasswordToken = crypto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest('hex');
+
+    this.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    return resetToken;
 };
 
 module.exports = mongoose.model('User', userSchema);

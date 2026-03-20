@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { LogIn, Mail, Lock } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const { login } = useContext(AuthContext);
+    const { login, googleLogin } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -25,6 +26,21 @@ const Login = () => {
         } else {
             setError(result.message);
         }
+    };
+
+    const handleGoogleSuccess = async (response) => {
+        setIsLoading(true);
+        const result = await googleLogin(response.credential);
+        setIsLoading(false);
+        if (result.success) {
+            navigate('/');
+        } else {
+            setError(result.message);
+        }
+    };
+
+    const handleGoogleError = () => {
+        setError('Google login was unsuccessful. Try again.');
     };
 
     return (
@@ -54,17 +70,17 @@ const Login = () => {
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Email address
+                                Email or Phone Number
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <Mail className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    type="email"
+                                    type="text"
                                     required
                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out"
-                                    placeholder="you@example.com"
+                                    placeholder="you@example.com or +1234567890"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
@@ -88,6 +104,13 @@ const Login = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
+                            <div className="flex items-center justify-end mt-1">
+                                <div className="text-sm">
+                                    <Link to="/forgotpassword" data-id="forgot-password-link" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                                        Forgot your password?
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
 
                         <div>
@@ -100,6 +123,28 @@ const Login = () => {
                             </button>
                         </div>
                     </form>
+
+                    <div className="mt-6">
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">Or continue with</span>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-center">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={handleGoogleError}
+                                theme="filled_blue"
+                                text="signin_with"
+                                shape="pill"
+                                width="100%"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

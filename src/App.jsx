@@ -18,6 +18,8 @@ import Checkout from './pages/checkout';
 import Cart from './pages/Cart';
 import AdminDashboard from './pages/admin';
 import Dashboard from './pages/dashboard';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function AnimatedRoutes() {
     const location = useLocation();
@@ -31,6 +33,8 @@ function AnimatedRoutes() {
                 <Route path="/cart" element={<PageWrapper><Cart /></PageWrapper>} />
                 <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
                 <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
+                <Route path="/forgotpassword" element={<PageWrapper><ForgotPassword /></PageWrapper>} />
+                <Route path="/resetpassword/:token" element={<PageWrapper><ResetPassword /></PageWrapper>} />
                 <Route path="/checkout" element={
                     <ProtectedRoute>
                         <PageWrapper><Checkout /></PageWrapper>
