@@ -33,7 +33,7 @@ router.post('/register', async (req, res) => {
             email,
             phone,
             password,
-            role: email.includes('admin') ? 'admin' : 'user' // simple demo auth
+            role: 'user', // Default is user. Admin role should be assigned manually by existing admin.
         });
 
         if (user) {

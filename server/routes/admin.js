@@ -50,4 +50,29 @@ router.get('/users', protect, admin, async (req, res) => {
     }
 });
 
+// @route PUT /api/admin/users/:id/role
+// @desc Change user role
+// @access Private/Admin
+router.put('/users/:id/role', protect, admin, async (req, res) => {
+    try {
+        const { role } = req.body;
+        const user = await User.findById(req.params.id);
+
+        if (user) {
+            user.role = role || 'user';
+            const updatedUser = await user.save();
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                role: updatedUser.role
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating user role' });
+    }
+});
+
 module.exports = router;
